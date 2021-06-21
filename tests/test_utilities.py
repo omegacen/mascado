@@ -50,3 +50,6 @@ class AffineTestCase (TestCase):
                                         ignore_index=True)
         mapped = affine.affine_trafo_cat(mask, trafo, x='xref', y='yref')
         self.assertTrue(np.allclose(mapped, image))
+
+    def test_fail(self):
+        1/0
