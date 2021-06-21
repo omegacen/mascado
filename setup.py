@@ -19,7 +19,9 @@ setup(
         'numpy>=1.14',
         'matplotlib',
         'scipy',
-        'pandas'],
+        'pandas',
+        'pytest',
+        'pytest-cov'],
     scripts=[
         'scripts/mascado_analyze',
         'scripts/mascado_compare'],
