@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-"""Generate mock data for mascado.
+r"""Generate mock data for mascado.
 
 Based on the example in docs\source\scripts.rst.
 """
+from pathlib import Path
 
 import numpy
 import io
@@ -25,7 +26,6 @@ def main():
     """Write mock data."""
     nmax = 6
     xfieldmax = 7.50000E-003
-    rfield = 1.06066E-002
     xpredictedmax = 8.95381E+001
 
     iis = numpy.arange(-nmax, nmax+1)
@@ -37,17 +37,18 @@ def main():
 
     xfields = iis2 * xfieldmax / nmax
     yfields = jjs2 * xfieldmax / nmax
+    rfields = numpy.sqrt(xfields ** 2 + yfields ** 2)
 
     xpredicteds = iis2 * xpredictedmax / nmax
     ypredicteds = jjs2 * xpredictedmax / nmax
 
     xreals = xpredicteds + (iis2 / 10.)**2
-    yreals = ypredicteds + (jjs2 / 10.)**3 + (iis2 * jjs2 / 100.) **2
+    yreals = ypredicteds + (jjs2 / 10.)**3 + (iis2 * jjs2 / 100.) ** 2
 
     lines = [
-        format_line(mi, mj, xf, yf, 0.0106066, px, py, rx, ry, -0.001)
-        for mi, mj, xf, yf, px, py, rx, ry
-        in zip(iis2, jjs2, xfields, yfields, xpredicteds, ypredicteds, xreals, yreals)
+        format_line(mi, mj, xf, yf, rf, px, py, rx, ry, -0.001)
+        for mi, mj, xf, yf, rf, px, py, rx, ry
+        in zip(iis2, jjs2, xfields, yfields, rfields, xpredicteds, ypredicteds, xreals, yreals)
     ]
 
     sfile = """Listing of Grid Distortion Data
@@ -75,7 +76,8 @@ D =    6.84e+005
 SMIA TV Distortion -0.0011%
 """
 
-    with io.open('zemaxmock.txt', 'w', encoding='utf-8', newline='\n') as f:
+    filename = Path(__file__).resolve().parent.parent / "mockdata" / "mockdata2.txt"
+    with io.open(filename, 'w', encoding='latin-1', newline='\n') as f:
         f.write(sfile)
 
 
