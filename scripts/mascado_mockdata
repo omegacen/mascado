@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+
+r"""Generate mock data for mascado.
+
+Based on the example in docs\source\scripts.rst.
+"""
+from pathlib import Path
+
+import numpy
+import io
+
+
+def ff(f):
+    """Format float a la zemax."""
+    return numpy.format_float_scientific(f, exp_digits=3, precision=5, unique=False).upper()
+
+
+def format_line(mi, mj, xf, yf, rf, px, py, rx, ry, d):
+    """Format line a la zemax."""
+    sxf, syf, srf, spx, spy, srx, sry = [ff(f) for f in [xf, yf, rf, px, py, rx, ry]]
+    sfloats = "".join(f"{f:>14}" for f in [sxf, syf, srf, spx, spy, srx, sry])
+    return f"{mi:>4}{mj:>5}{sfloats}{d:>11}%"
+
+
+def main():
+    """Write mock data."""
+    nmax = 6
+    xfieldmax = 7.50000E-003
+    xpredictedmax = 8.95381E+001
+
+    iis = numpy.arange(-nmax, nmax+1)
+    jjs = numpy.arange(-nmax, nmax+1)
+    jjmesh, iimesh = numpy.meshgrid(iis, jjs)
+
+    iis2 = iimesh.flatten()
+    jjs2 = jjmesh.flatten()
+
+    xfields = iis2 * xfieldmax / nmax
+    yfields = jjs2 * xfieldmax / nmax
+    rfields = numpy.sqrt(xfields ** 2 + yfields ** 2)
+
+    xpredicteds = iis2 * xpredictedmax / nmax
+    ypredicteds = jjs2 * xpredictedmax / nmax
+
+    xreals = xpredicteds + (iis2 / 10.)**2
+    yreals = ypredicteds + (jjs2 / 10.)**3 + (iis2 * jjs2 / 100.) ** 2
+
+    lines = [
+        format_line(mi, mj, xf, yf, rf, px, py, rx, ry, -0.001)
+        for mi, mj, xf, yf, rf, px, py, rx, ry
+        in zip(iis2, jjs2, xfields, yfields, rfields, xpredicteds, ypredicteds, xreals, yreals)
+    ]
+
+    sfile = """Listing of Grid Distortion Data
+
+File : ...
+Title: EELT Optical System Specification
+Date : ...
+
+
+Units are Millimeters.
+Field units are degrees
+Wavelength: 1.00000 µm
+Reference Coordinates: Xref = 0.00000E+000, Yref = 0.00000E+000
+
+   i    j       X-Field       Y-Field       R-Field   Predicted X   Predicted Y        Real X        Real Y     Distortion
+""" + "\n".join(lines) + """
+
+Maximum distortion: -0.0021%
+Predicted coordinate ABCD matrix:
+A =    3.84e+005
+B =            0
+C =            0
+D =    6.84e+005
+
+SMIA TV Distortion -0.0011%
+"""
+
+    filename = Path(__file__).resolve().parent.parent / "mockdata" / "mockdata2.txt"
+    with io.open(filename, 'w', encoding='latin-1', newline='\n') as f:
+        f.write(sfile)
+
+
+if __name__ == "__main__":
+    main()
