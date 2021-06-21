@@ -30,7 +30,7 @@ def main():
 
     iis = numpy.arange(-nmax, nmax+1)
     jjs = numpy.arange(-nmax, nmax+1)
-    iimesh, jjmesh = numpy.meshgrid(iis, jjs)
+    jjmesh, iimesh = numpy.meshgrid(iis, jjs)
 
     iis2 = iimesh.flatten()
     jjs2 = jjmesh.flatten()
