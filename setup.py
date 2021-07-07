@@ -16,6 +16,7 @@ setup(
 
     packages=find_packages(exclude=['tests.*', 'tests']),
     install_requires=[
+        'importlib-resources',
         'numpy>=1.14',
         'matplotlib',
         'scipy',
@@ -23,5 +24,6 @@ setup(
     scripts=[
         'scripts/mascado_analyze',
         'scripts/mascado_compare'],
+    package_data={'mascado': ['resources/example_input/*']},
     test_suite='tests',
 )
